@@ -7,16 +7,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
     private TextView disk0TV, disk1TV, disk2TV;
     private ViewGroup tower0VG, tower1VG, tower2VG, placeholderVG;
-    private Stack tower0Stack = new Stack();
-    private Stack tower1Stack = new Stack();
-    private Stack tower2Stack = new Stack();
-    private int biggestValue = 0;
+    private Disk disk0, disk1, disk2;
+    private Tower tower0, tower1, tower2;
+    private Disk placeholder = null;
+    private boolean shouldSelectSource = true;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -29,79 +31,82 @@ public class MainActivity extends AppCompatActivity {
         this.tower1VG = this.findViewById(R.id.tower1VG);
         this.tower2VG = this.findViewById(R.id.tower2VG);
 
-        tower0Stack.push(3);
-        tower0Stack.push(2);
-        tower0Stack.push(1);
+        this.disk0 = new Disk(2);
+        this.disk1 = new Disk(4);
+        this.disk2 = new Disk(8);
+
+        this.tower0 = new Tower();
+        this.tower1 = new Tower();
+        this.tower2 = new Tower();
+
+        this.tower0.push(this.disk2);
+        this.tower0.push(this.disk1);
+        this.tower0.push(this.disk0);
+        this.tower0.display();
+    }
+
+    private void selectSource(Tower tower, ViewGroup towerVG)
+    {
+        if(tower.peek() != null)
+        {
+            this.placeholder = tower.pop();
+            TextView temp = (TextView)towerVG.getChildAt(0);
+            towerVG.removeViewAt(0);
+            this.placeholderVG.addView(temp);
+            this.shouldSelectSource = false;
+        }
+    }
+
+    private void selectDestination(Tower tower, ViewGroup towerVG)
+    {
+        if(tower.push(this.placeholder))
+        {
+            this.placeholder = null;
+            TextView temp = (TextView)this.placeholderVG.getChildAt(0);
+            this.placeholderVG.removeViewAt(0);
+            towerVG.addView(temp, 0);
+            this.shouldSelectSource = true;
+        }
     }
 
     public void tower0ButtonPressed(View v)
     {
-        if (biggestValue == 0)
+        if(this.shouldSelectSource)
         {
-            //put it in the place holder
-            View temp = this.tower0VG.getChildAt(0);
-            this.tower0VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
-            biggestValue = tower0Stack.pop();
-        }
-        else if (tower0Stack.getCount() == 0 || biggestValue < tower0Stack.peek())
-        {
-            //put it back in the stack
-            View temp = this.placeholderVG.getChildAt(0);
-            this.placeholderVG.removeViewAt(0);
-            this.tower0Stack.push(biggestValue);
-            this.tower0VG.addView(temp, 0);
-            biggestValue = 0;
+            this.selectSource(this.tower0, this.tower0VG);
         }
         else
         {
-            Toast.makeText(this, "Invalid Move", Toast.LENGTH_LONG).show();
+            this.selectDestination(this.tower0, this.tower0VG);
         }
     }
 
     public void tower1ButtonPressed(View v)
     {
-        if (biggestValue == 0)
+        if(this.shouldSelectSource)
         {
-            View temp = this.tower1VG.getChildAt(0);
-            this.tower1VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
-            biggestValue = tower1Stack.pop();
-        }
-        else if (tower1Stack.getCount() == 0 || biggestValue < tower1Stack.peek())
-        {
-            View temp = this.placeholderVG.getChildAt(0);
-            this.placeholderVG.removeViewAt(0);
-            this.tower1Stack.push(biggestValue);
-            this.tower1VG.addView(temp, 0);
-            biggestValue = 0;
+            this.selectSource(this.tower1, this.tower1VG);
         }
         else
         {
-            Toast.makeText(this, "Invalid Move", Toast.LENGTH_LONG).show();
+            this.selectDestination(this.tower1, this.tower1VG);
         }
     }
 
     public void tower2ButtonPressed(View v)
     {
-        if (biggestValue == 0)
+        if(this.shouldSelectSource)
         {
-            View temp = this.tower2VG.getChildAt(0);
-            this.tower2VG.removeViewAt(0);
-            this.placeholderVG.addView(temp);
-            biggestValue = tower2Stack.pop();
-        }
-        else if (tower2Stack.getCount() == 0 || biggestValue < tower2Stack.peek())
-        {
-            View temp = this.placeholderVG.getChildAt(0);
-            this.placeholderVG.removeViewAt(0);
-            this.tower2Stack.push(biggestValue);
-            this.tower2VG.addView(temp, 0);
-            biggestValue = 0;
+            this.selectSource(this.tower2, this.tower2VG);
         }
         else
         {
-            Toast.makeText(this, "Invalid Move", Toast.LENGTH_LONG).show();
+            this.selectDestination(this.tower2, this.tower2VG);
+        }
+
+        if(tower2.getCount() == 3)
+        {
+            Toast.makeText(this, "You win", Toast.LENGTH_LONG).show();
         }
     }
 }
